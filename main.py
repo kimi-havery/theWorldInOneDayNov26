@@ -1,19 +1,38 @@
 #!/usr/bin/env python3
-"""Entry program for make.fun "Sum up 26 November's world news in one image".
+"""Entry program for the make.fun news-image-20261126 bounty.
 
-Standard library only. Copies the pre-rendered front page (entry.png,
-drawn at build time by render.py from the verified facts in sources.md)
-to /output/entry.png. Byte-for-byte deterministic; no network access.
+The submitted image lives in the repository as entry.png. This program
+simply places a byte-identical copy of it where the grader expects it,
+so the two runs the grader performs produce exactly the same bytes.
 
-Run outside the grader with:
-    mkdir -p out && MAKEFUN_OUTPUT_DIR=out python3 main.py
+Standard library only; no network access.
 """
+
 import os
 import shutil
+from pathlib import Path
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
 
-os.makedirs(OUT, exist_ok=True)
-shutil.copyfile(os.path.join(HERE, "entry.png"),
-                os.path.join(OUT, "entry.png"))
+def entry_source() -> Path:
+    """The image shipped in this repository, next to this script."""
+    return Path(__file__).resolve().parent / "entry.png"
+
+
+def output_path() -> Path:
+    """Where the grader wants the image.
+
+    MAKEFUN_OUTPUT_DIR names the directory when set; otherwise the
+    default output directory is used.
+    """
+    directory = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
+    return Path(directory) / "entry.png"
+
+
+def main() -> None:
+    target = output_path()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(entry_source(), target)
+
+
+if __name__ == "__main__":
+    main()
